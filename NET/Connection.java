@@ -1,3 +1,5 @@
+package NET;
+
 import java.io.*;
 import java.net.*;
 
@@ -21,11 +23,14 @@ class Connection extends Thread {
 		try {
 			while (true) {
 				String data = in.readUTF(); // read a line of data from the stream
-				System.out.println(data);
-				// if (data.equals("exit")) {
-				// 	clientSocket.close();
-				// 	return;
-				// }
+				//System.out.println(data);
+				String [] parsedData = data.split("&");
+				if(parsedData.length == 3) {
+					boolean updated = GameModel.updateMap(Integer.valueOf(parsedData[0]), Integer.valueOf(parsedData[1]), Integer.valueOf(parsedData[2]));
+					if(updated) {
+						out.writeUTF("UPDATED WITH VALUE " + GameModel.getValue(Integer.valueOf(parsedData[0]), Integer.valueOf(parsedData[1])));
+					}
+				}
 			}
 		} catch (EOFException e) {
 			System.out.println("EOF:" + e.getMessage());

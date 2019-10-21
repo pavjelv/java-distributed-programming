@@ -1,3 +1,5 @@
+package NET;
+
 import java.net.*;
 import java.util.Scanner;
 import java.io.*;
@@ -8,11 +10,12 @@ public class TCPClient {
         Socket s = null;
         try {
             int serverPort = 7896;
-            s = new Socket(args[1], serverPort);
+            s = new Socket(InetAddress.getLocalHost(), serverPort);
             DataInputStream in = new DataInputStream(s.getInputStream());
             DataOutputStream out = new DataOutputStream(s.getOutputStream());
             Scanner scanner = new Scanner(System.in);
             String string;
+            ClientConnection connection = new ClientConnection(s);
             while (true) {
                 string = scanner.next();
                 out.writeUTF(string); // UTF is a string encoding
