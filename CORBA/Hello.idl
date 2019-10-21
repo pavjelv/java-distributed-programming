@@ -1,0 +1,10 @@
+//HelloApp.idl
+module HelloApp		//1
+{
+  interface Hello		//2
+  {
+  string sayHello();		//3
+  oneway void shutdown();	//4
+  //long sum(in long a, in long b);
+  };
+};
