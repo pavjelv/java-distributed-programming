@@ -33,6 +33,8 @@ public class ClientConnection extends Thread {
                 String data = in.readUTF();
                 if(data.startsWith(SharedTag.MODEL_UPDATE)) {
                     client.getConnectionStatusLabel().setText(data);
+                    client.updateMap(10, 11, 50);
+                    client.getGameField().firePropertyChange(SharedTag.MODEL_UPDATE, true, false);
                 }
             }
         } catch (EOFException e) {

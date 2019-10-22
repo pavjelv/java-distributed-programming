@@ -7,6 +7,7 @@ class Connection extends Thread {
 	DataInputStream in;
 	DataOutputStream out;
 	Socket clientSocket;
+	private boolean running = true;
 
 	public Connection(Socket aClientSocket) {
 		try {
@@ -21,7 +22,7 @@ class Connection extends Thread {
 
 	public void run() { // an echo server
 		try {
-			while (true) {
+			while (running) {
 				String data = in.readUTF(); // read a line of data from the stream
 				//System.out.println(data);
 				String [] parsedData = data.split("&");
@@ -34,6 +35,12 @@ class Connection extends Thread {
 			System.out.println("EOF:" + e.getMessage());
 		} catch (IOException e) {
 			System.out.println("readline:" + e.getMessage());
+			try {
+				this.running = false;
+				clientSocket.close();
+			} catch (IOException e1) {
+
+			}
 		}
 	}
 

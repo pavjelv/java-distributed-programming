@@ -1,7 +1,7 @@
 package NET;
 
 public class GameModel {
-    private static final int[][] mapModel = new int[20][];
+    private static final int[][] mapModel = new int[15][];
 
     static {
         initializeMap();
@@ -9,7 +9,7 @@ public class GameModel {
 
     private static void initializeMap() {
         for (int i = 0; i < mapModel.length; i++) {
-            mapModel[i] = new int[20];
+            mapModel[i] = new int[15];
             for (int j = 0; j < mapModel[i].length; j++) {
                 mapModel[i][j] = 0;
             }
