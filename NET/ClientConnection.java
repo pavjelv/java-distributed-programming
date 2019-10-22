@@ -1,32 +1,39 @@
 package NET;
 
+import NET.UI.GameClient;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 
-class ClientConnection extends Thread {
+public class ClientConnection extends Thread {
     DataInputStream in;
     DataOutputStream out;
     Socket serverSocket;
+    GameClient client;
 
-    public ClientConnection(Socket serverSocket) {
+    public ClientConnection(Socket serverSocket, GameClient gameClient) {
+        this.client = gameClient;
         try {
             this.serverSocket = serverSocket;
             in = new DataInputStream(serverSocket.getInputStream());
             out = new DataOutputStream(serverSocket.getOutputStream());
+            gameClient.setDos(out);
             this.start();
         } catch (IOException e) {
             System.out.println("Connection:" + e.getMessage());
         }
     }
 
-    public void run() { // an echo server
+    public void run() {
         try {
             while (true) {
                 String data = in.readUTF();
-                System.out.println("Got data from server " + data); // read a line of data from the stream
+                if(data.startsWith(SharedTag.MODEL_UPDATE)) {
+                    client.getConnectionStatusLabel().setText(data);
+                }
             }
         } catch (EOFException e) {
             System.out.println("EOF:" + e.getMessage());

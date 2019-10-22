@@ -25,17 +25,28 @@ class Connection extends Thread {
 				String data = in.readUTF(); // read a line of data from the stream
 				//System.out.println(data);
 				String [] parsedData = data.split("&");
-				if(parsedData.length == 3) {
-					boolean updated = GameModel.updateMap(Integer.valueOf(parsedData[0]), Integer.valueOf(parsedData[1]), Integer.valueOf(parsedData[2]));
-					if(updated) {
-						out.writeUTF("UPDATED WITH VALUE " + GameModel.getValue(Integer.valueOf(parsedData[0]), Integer.valueOf(parsedData[1])));
-					}
+				if(parsedData[0].equals(SharedTag.UPDATE_MAP_KEY)) {
+					processMapUpdate(parsedData);
 				}
+
 			}
 		} catch (EOFException e) {
 			System.out.println("EOF:" + e.getMessage());
 		} catch (IOException e) {
 			System.out.println("readline:" + e.getMessage());
+		}
+	}
+
+	private void processMapUpdate(String [] data) {
+		try {
+			if (data.length == 4) {
+				boolean updated = GameModel.updateMap(Integer.valueOf(data[1]), Integer.valueOf(data[2]), Integer.valueOf(data[3]));
+				if (updated) {
+					out.writeUTF(SharedTag.MODEL_UPDATE + " " + GameModel.getValue(Integer.valueOf(data[1]), Integer.valueOf(data[2])));
+				}
+			}
+		} catch (IOException e) {
+			System.out.println("Error while map update: " + e.getMessage());
 		}
 	}
 }

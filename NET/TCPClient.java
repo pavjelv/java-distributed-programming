@@ -1,12 +1,17 @@
 package NET;
 
+import NET.UI.GameClient;
+
 import java.net.*;
 import java.util.Scanner;
 import java.io.*;
 
 public class TCPClient {
     public static void main(String args[]) {
-        // arguments supply message and hostname
+        createClientConnection();
+    }
+
+    public static void createClientConnection() {
         Socket s = null;
         try {
             int serverPort = 7896;
@@ -15,10 +20,12 @@ public class TCPClient {
             DataOutputStream out = new DataOutputStream(s.getOutputStream());
             Scanner scanner = new Scanner(System.in);
             String string;
-            ClientConnection connection = new ClientConnection(s);
+
+            GameClient gc = new GameClient();
+            ClientConnection connection = new ClientConnection(s, gc);
             while (true) {
                 string = scanner.next();
-                out.writeUTF(string); // UTF is a string encoding
+                //out.writeUTF(string); // UTF is a string encoding
                 if (string.equals("exit")) {
                     s.close();
                     scanner.close();

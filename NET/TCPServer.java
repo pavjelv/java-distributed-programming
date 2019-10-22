@@ -13,7 +13,6 @@ public class TCPServer {
         try {
             int serverPort = 7896; // the server port
             ServerSocket listenSocket = new ServerSocket(serverPort); // new server port generated
-            GameModel gameModel = new GameModel();
             while(true) {
                 Socket clientSocket = listenSocket.accept(); // listen for new connection
                 System.out.println("Client connected");
