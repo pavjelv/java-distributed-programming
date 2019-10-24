@@ -2,6 +2,7 @@ package NET;
 
 import NET.UI.GameClient;
 
+import java.awt.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -14,14 +15,19 @@ public class ClientConnection extends Thread {
     Socket serverSocket;
     GameClient client;
 
-    public ClientConnection(Socket serverSocket, GameClient gameClient) {
-        this.client = gameClient;
+    public ClientConnection(Socket serverSocket) {
+        this.client = new GameClient();
         try {
             this.serverSocket = serverSocket;
             in = new DataInputStream(serverSocket.getInputStream());
             out = new DataOutputStream(serverSocket.getOutputStream());
-            gameClient.setDos(out);
-            this.start();
+            client.setDos(out);
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    ClientConnection.this.start();
+                }
+            });
         } catch (IOException e) {
             System.out.println("Connection:" + e.getMessage());
         }
@@ -31,10 +37,15 @@ public class ClientConnection extends Thread {
         try {
             while (true) {
                 String data = in.readUTF();
-                if(data.startsWith(SharedTag.MODEL_UPDATE)) {
-                    client.getConnectionStatusLabel().setText(data);
+                if(data.startsWith(SharedTag.STATUS_OK)) {
+                    client.getConnectionStatusLabel().setText("Successfully updated!");
                     client.updateMap(10, 11, 50);
-                    client.getGameField().firePropertyChange(SharedTag.MODEL_UPDATE, true, false);
+                    client.getGameField().firePropertyChange(SharedTag.STATUS_OK, true, false);
+                } else if(data.startsWith(SharedTag.MODEL_UPDATE)) {
+                    client.getConnectionStatusLabel().setText("Your turn");
+                    System.out.println("Data received");
+                    System.out.println(data);
+                    client.getGameField().firePropertyChange(SharedTag.MODEL_UPDATE, 1, 5);
                 }
             }
         } catch (EOFException e) {

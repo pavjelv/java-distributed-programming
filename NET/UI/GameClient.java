@@ -52,7 +52,7 @@ public class GameClient {
             @Override
             public void mouseClicked(MouseEvent e) {
                 connectionStatusLabel.setText("Mouse event: " + getSquareMapCoordinate(e.getX()) + " " + getSquareMapCoordinate(e.getY()));
-                if(turnCount < 5 && turnButton.isVisible()) {
+                if(turnCount < 5 && turnButton.isEnabled()) {
                     Graphics graphics = gameField.getGraphics();
                     redrawGrid(graphics);
                     updateGameField(graphics, getSquareMapCoordinate(e.getX()), getSquareMapCoordinate(e.getY()), true);
@@ -60,16 +60,24 @@ public class GameClient {
                 }
             }
         });
-        gameField.addPropertyChangeListener(SharedTag.MODEL_UPDATE, new PropertyChangeListener() {
+        gameField.addPropertyChangeListener(SharedTag.STATUS_OK, new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 System.out.println("UPDATING GAME FIELD");
                 updateGameField(gameField.getGraphics());
-                turnButton.setEnabled(true);
-                turnCount = 0;
              }
         });
+        gameField.addPropertyChangeListener(SharedTag.MODEL_UPDATE, new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                System.out.println("MAP RESULT IS ON CLIENT");
+                turnButton.setEnabled(true);
+                updateGameField(gameField.getGraphics());
+                turnCount = 0;
+            }
+        });
         turnButton.setVisible(false);
+        turnButton.setEnabled(false);
         turnButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

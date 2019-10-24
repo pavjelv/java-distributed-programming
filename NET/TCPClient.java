@@ -21,8 +21,7 @@ public class TCPClient {
             Scanner scanner = new Scanner(System.in);
             String string;
 
-            GameClient gc = new GameClient();
-            ClientConnection connection = new ClientConnection(s, gc);
+            ClientConnection connection = new ClientConnection(s);
             while (true) {
                 string = scanner.next();
                 //out.writeUTF(string); // UTF is a string encoding
