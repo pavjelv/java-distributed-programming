@@ -2,7 +2,6 @@ package NET.server;
 
 import NET.shared.MapProcessor;
 import NET.shared.SharedTag;
-import NET.client.GameModel;
 
 import java.io.*;
 import java.net.*;

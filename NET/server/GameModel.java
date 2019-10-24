@@ -1,8 +1,8 @@
-package NET.client;
+package NET.server;
 
 import java.util.concurrent.Semaphore;
 
-public class GameModel {
+class GameModel {
     private static final int mapSize = 15;
     private static final int[][] mapModel = new int[mapSize][];
 
