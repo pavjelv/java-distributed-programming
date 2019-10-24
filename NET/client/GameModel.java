@@ -1,4 +1,4 @@
-package NET;
+package NET.client;
 
 import java.util.concurrent.Semaphore;
 
@@ -45,5 +45,13 @@ public class GameModel {
 
     public static int getMapSize() {
         return mapSize;
+    }
+
+    public static int[][] getCopyOfMap() {
+        return mapModel.clone();
+    }
+
+    public static int[][] getMapModel() {
+        return mapModel;
     }
 }

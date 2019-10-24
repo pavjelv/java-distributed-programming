@@ -1,10 +1,9 @@
-package NET.UI;
+package NET.client.UI;
 
-import NET.SharedTag;
+import NET.shared.SharedTag;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
@@ -23,6 +22,7 @@ public class GameClient {
     private int [][] gameMap;
     private final int uniqueClientId = (int)System.currentTimeMillis();
     private int turnCount = 0;
+    private StringBuilder currentChangedCells = new StringBuilder();
 
     public GameClient() {
         gameMap = new int[15][];
@@ -55,7 +55,12 @@ public class GameClient {
                 if(turnCount < 5 && turnButton.isEnabled()) {
                     Graphics graphics = gameField.getGraphics();
                     redrawGrid(graphics);
-                    updateGameField(graphics, getSquareMapCoordinate(e.getX()), getSquareMapCoordinate(e.getY()), true);
+                    int x = getSquareMapCoordinate(e.getX());
+                    int y = getSquareMapCoordinate(e.getY());
+                    updateGameField(graphics, x, y, true);
+                    currentChangedCells.append(x).append(SharedTag.COORDINATE_SEPARATOR)
+                            .append(y).append(SharedTag.COORDINATE_SEPARATOR)
+                            .append(getMapCellValue(x, y)).append(SharedTag.CELL_SEPARATOR);
                     turnCount++;
                 }
             }
@@ -63,14 +68,14 @@ public class GameClient {
         gameField.addPropertyChangeListener(SharedTag.STATUS_OK, new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                System.out.println("UPDATING GAME FIELD");
+                System.out.println("Ok from server");
                 updateGameField(gameField.getGraphics());
              }
         });
         gameField.addPropertyChangeListener(SharedTag.MODEL_UPDATE, new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                System.out.println("MAP RESULT IS ON CLIENT");
+                System.out.println("Model is updated from server");
                 turnButton.setEnabled(true);
                 updateGameField(gameField.getGraphics());
                 turnCount = 0;
@@ -83,8 +88,11 @@ public class GameClient {
             public void mouseClicked(MouseEvent e) {
                 turnButton.setEnabled(false);
                 try {
-                    getDos().writeUTF(SharedTag.UPDATE_MAP_KEY + "&12&11&1337");
+                    getDos().writeUTF(SharedTag.UPDATE_MAP_KEY + " "
+                            + currentChangedCells.deleteCharAt(currentChangedCells.length() - 1).toString());
+                    currentChangedCells = new StringBuilder();
                 } catch (IOException exception) {
+                    currentChangedCells = new StringBuilder();
                     connectionStatusLabel.setText("Connection error occurred!");
                 }
             }
@@ -106,6 +114,10 @@ public class GameClient {
                 updateGameField(graphics, i, j, false);
             }
         }
+    }
+
+    private int getMapCellValue(int x, int y) {
+        return gameMap[x][y];
     }
 
     private void updateGameField(Graphics graphics, int xCoordinate, int yCoordinate, boolean fromClick) {
@@ -134,6 +146,10 @@ public class GameClient {
 
     public void updateMap(int x, int y, int value) {
         gameMap[x][y] = value;
+    }
+
+    public void updateMap(int[][] newMap) {
+        gameMap = newMap;
     }
 
     private void redrawGrid(Graphics graphics) {

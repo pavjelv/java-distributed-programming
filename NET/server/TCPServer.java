@@ -1,4 +1,4 @@
-package NET;
+package NET.server;
 
 import java.net.*;
 import java.io.*;
@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class TCPServer {
+class TCPServer {
     private static final Set<Connection> connectionSet = new HashSet<>();
 
     public static void main (String args[]) {

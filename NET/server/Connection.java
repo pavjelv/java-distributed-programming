@@ -1,4 +1,8 @@
-package NET;
+package NET.server;
+
+import NET.shared.MapProcessor;
+import NET.shared.SharedTag;
+import NET.client.GameModel;
 
 import java.io.*;
 import java.net.*;
@@ -32,9 +36,9 @@ class Connection extends Thread {
                 }
                 sendUpdatedMapToClient();
                 String data = in.readUTF(); // read a line of data from the stream
-                String [] parsedData = data.split("&");
-                if(parsedData[0].equals(SharedTag.UPDATE_MAP_KEY)) {
-                    processMapUpdate(parsedData);
+                String [] dataResponse = data.split(" ");
+                if(dataResponse[0].equals(SharedTag.UPDATE_MAP_KEY)) {
+                    processMapUpdate(dataResponse[1]);
                 }
                 System.out.println("Lock is released");
                 GameModel.release();
@@ -53,14 +57,10 @@ class Connection extends Thread {
         }
     }
 
-    private void processMapUpdate(String [] data) {
+    private void processMapUpdate(String data) {
         try {
-            if (data.length == 4) {
-                boolean updated = GameModel.updateMap(Integer.valueOf(data[1]), Integer.valueOf(data[2]), Integer.valueOf(data[3]));
-                if (updated) {
-                    out.writeUTF(SharedTag.STATUS_OK + " " + GameModel.getValue(Integer.valueOf(data[1]), Integer.valueOf(data[2])));
-                }
-            }
+            MapProcessor.updateMap(GameModel.getMapModel(), data);
+            out.writeUTF(SharedTag.STATUS_OK);
         } catch (IOException e) {
             System.out.println("Error while map update: " + e.getMessage());
         }
@@ -68,23 +68,9 @@ class Connection extends Thread {
 
     private void sendUpdatedMapToClient() {
         try {
-            out.writeUTF(SharedTag.MODEL_UPDATE + " " + serializeMap());
+            out.writeUTF(SharedTag.MODEL_UPDATE + " " + MapProcessor.serializeMap(GameModel.getCopyOfMap(), GameModel.getMapSize()));
         } catch (IOException e) {
             System.out.println("Error while map update: " + e.getMessage());
         }
-    }
-
-    private String serializeMap() {
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < GameModel.getMapSize(); i++) {
-            for (int j = 0; j < GameModel.getMapSize(); j++) {
-                result.append(i).append(SharedTag.COORDINATE_SEPARATOR).append(j)
-                        .append(SharedTag.COORDINATE_SEPARATOR).append(GameModel.getValue(i,j))
-                        .append(SharedTag.CELL_SEPARATOR);
-            }
-            result.deleteCharAt(result.length() - 1);
-            result.append(SharedTag.ROW_SEPARATOR);
-        }
-        return result.toString();
     }
 }

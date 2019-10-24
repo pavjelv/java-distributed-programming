@@ -1,12 +1,10 @@
-package NET;
-
-import NET.UI.GameClient;
+package NET.client;
 
 import java.net.*;
 import java.util.Scanner;
 import java.io.*;
 
-public class TCPClient {
+class TCPClient {
     public static void main(String args[]) {
         createClientConnection();
     }

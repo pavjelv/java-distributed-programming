@@ -1,6 +1,8 @@
-package NET;
+package NET.client;
 
-import NET.UI.GameClient;
+import NET.shared.MapProcessor;
+import NET.shared.SharedTag;
+import NET.client.UI.GameClient;
 
 import java.awt.*;
 import java.io.DataInputStream;
@@ -9,7 +11,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 
-public class ClientConnection extends Thread {
+class ClientConnection extends Thread {
     DataInputStream in;
     DataOutputStream out;
     Socket serverSocket;
@@ -37,14 +39,14 @@ public class ClientConnection extends Thread {
         try {
             while (true) {
                 String data = in.readUTF();
-                if(data.startsWith(SharedTag.STATUS_OK)) {
+                String [] dataResponse = data.split(" ");
+                if(dataResponse[0].equals(SharedTag.STATUS_OK)) {
                     client.getConnectionStatusLabel().setText("Successfully updated!");
-                    client.updateMap(10, 11, 50);
                     client.getGameField().firePropertyChange(SharedTag.STATUS_OK, true, false);
-                } else if(data.startsWith(SharedTag.MODEL_UPDATE)) {
+                } else if(dataResponse[0].equals(SharedTag.MODEL_UPDATE)) {
                     client.getConnectionStatusLabel().setText("Your turn");
                     System.out.println("Data received");
-                    System.out.println(data);
+                    client.updateMap(MapProcessor.deserializeMap(dataResponse[1]));
                     client.getGameField().firePropertyChange(SharedTag.MODEL_UPDATE, 1, 5);
                 }
             }
