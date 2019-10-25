@@ -57,11 +57,12 @@ public class GameClient {
                     redrawGrid(graphics);
                     int x = getSquareMapCoordinate(e.getX());
                     int y = getSquareMapCoordinate(e.getY());
-                    updateGameField(graphics, x, y, true);
+                    if (updateGameField(graphics, x, y, true)) {
+                        turnCount++;
+                    }
                     currentChangedCells.append(x).append(SharedTag.COORDINATE_SEPARATOR)
                             .append(y).append(SharedTag.COORDINATE_SEPARATOR)
                             .append(getMapCellValue(x, y)).append(SharedTag.CELL_SEPARATOR);
-                    turnCount++;
                 }
             }
         });
@@ -120,28 +121,33 @@ public class GameClient {
         return gameMap[x][y];
     }
 
-    private void updateGameField(Graphics graphics, int xCoordinate, int yCoordinate, boolean fromClick) {
+    private boolean updateGameField(Graphics graphics, int xCoordinate, int yCoordinate, boolean fromClick) {
         int currentCellValue = gameMap[xCoordinate][yCoordinate];
         if(currentCellValue == uniqueClientId) {
-            return;
-        } else if (currentCellValue == -1){
-            graphics.setColor(Color.BLACK);
+            graphics.setColor(Color.RED);
             graphics.fillRect(xCoordinate * squarePixelSize, yCoordinate * squarePixelSize, squarePixelSize, squarePixelSize);
+            return false;
+        } else if (currentCellValue == -uniqueClientId) {
+            graphics.setColor(Color.RED);
+            graphics.fillOval(xCoordinate * squarePixelSize, yCoordinate * squarePixelSize, squarePixelSize, squarePixelSize);
+        } else if (currentCellValue < 0 && currentCellValue != -uniqueClientId){
+            graphics.setColor(Color.BLUE);
+            graphics.fillOval(xCoordinate * squarePixelSize, yCoordinate * squarePixelSize, squarePixelSize, squarePixelSize);
         } else if (currentCellValue == 0) {
             if(fromClick) {
                 graphics.setColor(Color.RED);
                 gameMap[xCoordinate][yCoordinate] = uniqueClientId;
                 graphics.fillRect(xCoordinate * squarePixelSize, yCoordinate * squarePixelSize, squarePixelSize, squarePixelSize);
-            } else return;
+            } else return false;
         } else if (fromClick) {
-            gameMap[xCoordinate][yCoordinate] = -1;
-            graphics.setColor(Color.BLACK);
-            graphics.fillRect(xCoordinate * squarePixelSize, yCoordinate * squarePixelSize, squarePixelSize, squarePixelSize);
+            gameMap[xCoordinate][yCoordinate] = -uniqueClientId;
+            graphics.setColor(Color.RED);
+            graphics.fillOval(xCoordinate * squarePixelSize, yCoordinate * squarePixelSize, squarePixelSize, squarePixelSize);
         } else {
             graphics.setColor(Color.BLUE);
             graphics.fillRect(xCoordinate * squarePixelSize, yCoordinate * squarePixelSize, squarePixelSize, squarePixelSize);
         }
-
+        return true;
     }
 
     public void updateMap(int x, int y, int value) {
