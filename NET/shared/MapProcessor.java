@@ -1,6 +1,6 @@
 package NET.shared;
 
-public class MapProcessor {
+public final class MapProcessor {
     public static String serializeMap(int [][] map, int mapSize) {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < mapSize; i++) {

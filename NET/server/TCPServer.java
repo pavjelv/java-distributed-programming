@@ -8,7 +8,7 @@ import java.util.Set;
 
 class TCPServer {
     private static final Set<Connection> connectionSet = new HashSet<>();
-
+    private static int connectionNum = 0;
     public static void main (String args[]) {
         try {
             int serverPort = 7896; // the server port
@@ -16,7 +16,7 @@ class TCPServer {
             while(true) {
                 Socket clientSocket = listenSocket.accept(); // listen for new connection
                 System.out.println("Client connected");
-                Connection c = new Connection(clientSocket); // launch new thread
+                Connection c = new Connection(clientSocket, connectionNum++); // launch new thread
                 synchronized (connectionSet) {
                     connectionSet.add(c);
                 }

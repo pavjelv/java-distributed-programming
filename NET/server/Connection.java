@@ -12,11 +12,12 @@ class Connection extends Thread {
     Socket clientSocket;
     private boolean running = true;
 
-    public Connection(Socket aClientSocket) {
+    public Connection(Socket aClientSocket, int connectionNum) {
         try {
             clientSocket = aClientSocket;
             in = new DataInputStream(clientSocket.getInputStream());
             out = new DataOutputStream(clientSocket.getOutputStream());
+            sendBaseCoordinatesToClient(connectionNum);
             this.start();
         } catch (IOException e) {
             System.out.println("Connection:" + e.getMessage());
@@ -68,6 +69,23 @@ class Connection extends Thread {
     private void sendUpdatedMapToClient() {
         try {
             out.writeUTF(SharedTag.MODEL_UPDATE + " " + MapProcessor.serializeMap(GameModel.getCopyOfMap(), GameModel.getMapSize()));
+        } catch (IOException e) {
+            System.out.println("Error while map update: " + e.getMessage());
+        }
+    }
+
+    private void sendBaseCoordinatesToClient(int connectionNum) {
+        try {
+            int x;
+            int y;
+            if(connectionNum == 0) {
+                x = 4;
+                y = 4;
+            } else {
+                x = 11;
+                y = 11;
+            }
+            out.writeUTF(SharedTag.BASE_COORDINATES + " " + x + SharedTag.COORDINATE_SEPARATOR + y);
         } catch (IOException e) {
             System.out.println("Error while map update: " + e.getMessage());
         }

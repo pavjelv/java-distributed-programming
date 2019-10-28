@@ -8,4 +8,5 @@ public interface SharedTag {
     String ROW_SEPARATOR = "//";
     String CELL_SEPARATOR = "&";
     String COORDINATE_SEPARATOR = "%";
+    String BASE_COORDINATES = "baseCoordinates";
 }

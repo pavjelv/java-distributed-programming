@@ -48,6 +48,11 @@ class ClientConnection extends Thread {
                     System.out.println("Data received");
                     client.updateMap(MapProcessor.deserializeMap(dataResponse[1]));
                     client.getGameField().firePropertyChange(SharedTag.MODEL_UPDATE, 1, 5);
+                } else if(dataResponse[0].equals(SharedTag.BASE_COORDINATES)) {
+                    String [] baseCoordinates = dataResponse[1].split(SharedTag.COORDINATE_SEPARATOR);
+                    client.setBaseX(Integer.valueOf(baseCoordinates[0]));
+                    client.setBaseY(Integer.valueOf(baseCoordinates[1]));
+                    client.fulfillBaseCell();
                 }
             }
         } catch (EOFException e) {
