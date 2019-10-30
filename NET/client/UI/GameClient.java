@@ -75,6 +75,7 @@ public class GameClient {
             public void propertyChange(PropertyChangeEvent evt) {
                 System.out.println("Ok from server");
                 updateGameField(gameField.getGraphics());
+                drawAvailableCells(gameField.getGraphics());
              }
         });
         gameField.addPropertyChangeListener(SharedTag.MODEL_UPDATE, new PropertyChangeListener() {
@@ -82,8 +83,10 @@ public class GameClient {
             public void propertyChange(PropertyChangeEvent evt) {
                 System.out.println("Model is updated from server");
                 turnButton.setEnabled(true);
-                updateGameField(gameField.getGraphics());
-                drawAvailableCells(gameField.getGraphics());
+                if(turnButton.isVisible()) {
+                    updateGameField(gameField.getGraphics());
+                    drawAvailableCells(gameField.getGraphics());
+                }
                 turnCount = 0;
             }
         });
@@ -94,6 +97,9 @@ public class GameClient {
             public void mouseClicked(MouseEvent e) {
                 turnButton.setEnabled(false);
                 try {
+                    if(currentChangedCells.length() != 0) {
+                        currentChangedCells.deleteCharAt(currentChangedCells.length() - 1);
+                    }
                     getDos().writeUTF(SharedTag.UPDATE_MAP_KEY + " "
                             + currentChangedCells.deleteCharAt(currentChangedCells.length() - 1).toString());
                     currentChangedCells = new StringBuilder();
@@ -110,7 +116,13 @@ public class GameClient {
                 turnButton.setVisible(true);
                 startGameButton.setVisible(false);
                 connectionStatusLabel.setVisible(true);
-                gameField.firePropertyChange(SharedTag.STATUS_OK, false, true);
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        gameField.firePropertyChange(SharedTag.STATUS_OK, false, true);
+
+                    }
+                });
             }
         });
     }
@@ -269,6 +281,6 @@ public class GameClient {
     public void fulfillBaseCell () {
         currentChangedCells.append(baseX).append(SharedTag.COORDINATE_SEPARATOR)
                 .append(baseY).append(SharedTag.COORDINATE_SEPARATOR)
-                .append(getMapCellValue(baseX, baseY)).append(SharedTag.CELL_SEPARATOR);
+                .append(uniqueClientId).append(SharedTag.CELL_SEPARATOR);
     }
 }
