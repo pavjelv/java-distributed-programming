@@ -75,6 +75,7 @@ public class GameClient {
             public void propertyChange(PropertyChangeEvent evt) {
                 System.out.println("Ok from server");
                 updateGameField(gameField.getGraphics());
+                drawAvailableCells(gameField.getGraphics());
              }
         });
         gameField.addPropertyChangeListener(SharedTag.MODEL_UPDATE, new PropertyChangeListener() {
@@ -110,7 +111,12 @@ public class GameClient {
                 turnButton.setVisible(true);
                 startGameButton.setVisible(false);
                 connectionStatusLabel.setVisible(true);
-                gameField.firePropertyChange(SharedTag.STATUS_OK, false, true);
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        gameField.firePropertyChange(SharedTag.STATUS_OK, false, true);
+                    }
+                });
             }
         });
     }
@@ -269,6 +275,6 @@ public class GameClient {
     public void fulfillBaseCell () {
         currentChangedCells.append(baseX).append(SharedTag.COORDINATE_SEPARATOR)
                 .append(baseY).append(SharedTag.COORDINATE_SEPARATOR)
-                .append(getMapCellValue(baseX, baseY)).append(SharedTag.CELL_SEPARATOR);
+                .append(uniqueClientId).append(SharedTag.CELL_SEPARATOR);
     }
 }
