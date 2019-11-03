@@ -83,8 +83,10 @@ public class GameClient {
             public void propertyChange(PropertyChangeEvent evt) {
                 System.out.println("Model is updated from server");
                 turnButton.setEnabled(true);
-                updateGameField(gameField.getGraphics());
-                drawAvailableCells(gameField.getGraphics());
+                if(turnButton.isVisible()) {
+                    updateGameField(gameField.getGraphics());
+                    drawAvailableCells(gameField.getGraphics());
+                }
                 turnCount = 0;
             }
         });
@@ -95,6 +97,9 @@ public class GameClient {
             public void mouseClicked(MouseEvent e) {
                 turnButton.setEnabled(false);
                 try {
+                    if(currentChangedCells.length() != 0) {
+                        currentChangedCells.deleteCharAt(currentChangedCells.length() - 1);
+                    }
                     getDos().writeUTF(SharedTag.UPDATE_MAP_KEY + " "
                             + currentChangedCells.deleteCharAt(currentChangedCells.length() - 1).toString());
                     currentChangedCells = new StringBuilder();
@@ -115,6 +120,7 @@ public class GameClient {
                     @Override
                     public void run() {
                         gameField.firePropertyChange(SharedTag.STATUS_OK, false, true);
+
                     }
                 });
             }
