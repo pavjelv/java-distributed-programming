@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 
 public class TCPClient {
     private static final int SIZE = 10;
-
+    private static Scanner scanner = new Scanner(System.in);
+    private static int testc = 0;
     public static void main(String args[]) throws ClassNotFoundException {
         Socket s = null;
         try {
@@ -32,7 +33,7 @@ public class TCPClient {
         } catch (EOFException e) {
             System.out.println("EOF:" + e.getMessage()); // end of stream reached
         } catch (IOException e) {
-            System.out.println("readline:" + e.getMessage()); // error in reading the stream
+            e.printStackTrace(); // error in reading the stream
         } finally {
             if (s != null)
                 try {
@@ -46,6 +47,7 @@ public class TCPClient {
     private static void startGame(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException, OperationNotSupportedException {
         Action a = (Action) in.readObject();
         Id id = null;
+
         List<List<PointFlag>> myMap = null;
         List<List<PointFlag>> opponentMap = new ArrayList<List<PointFlag>>(SIZE);
 
@@ -67,9 +69,11 @@ public class TCPClient {
         out.writeObject(new Action(myMap));
         while (true) {
             Action nextAction = (Action) in.readObject();
+            System.out.println(nextAction.toString());
             switch (nextAction.getType()) {
                 case WAITING_FOR_YOUR_TURN:
-                    makeNextTurn();
+//                    makeNextTurn();
+                    out.writeObject(new Action(getTurnCoordinates()));
                     break;
                 case WIN:
                     System.err.println("you won");
@@ -97,7 +101,16 @@ public class TCPClient {
     }
 
     private static Pair<Integer, Integer> getTurnCoordinates() {
-        return null;
+//        System.out.print("Enter next coordinates, x: ");
+//        int x = scanner.nextInt();
+//        System.out.println();
+//        System.out.print("y:");
+//        int y = scanner.nextInt();
+//        System.out.println();
+
+        return getMockPoint();
+
+//        return new Pair<>(x,y);
     }
 
     private static List<List<PointFlag>> setFlet() {
@@ -111,11 +124,13 @@ public class TCPClient {
             map.add(list);
         }
         List<Integer> remainingFleet = new ArrayList<>(4);
-        remainingFleet.set(0, 4);
-        remainingFleet.set(1, 3);
-        remainingFleet.set(2, 2);
-        remainingFleet.set(3, 1);
+        remainingFleet.add(4);
+        remainingFleet.add(3);
+        remainingFleet.add(2);
+        remainingFleet.add(1);
         // first set 4
+        System.out.println("set 4");
+
         Pair<Integer, Integer> point = getTurnCoordinates();
         List<Pair<Integer, Integer>> listOfPoints = new ArrayList<>();
         listOfPoints.add(point);
@@ -139,9 +154,14 @@ public class TCPClient {
         }
         // now set 3s
         set3s(listOfPoints);
+        System.out.println(listOfPoints);
 
         // now set 2s
         nowSet2s(listOfPoints);
+        System.out.println("set 1");
+        System.out.println(listOfPoints);
+
+
         List<Pair<Integer, Integer>> listof1s = new ArrayList<>();
         while (listof1s.size() < 4) {
             Pair<Integer, Integer> nextPoint = getTurnCoordinates();
@@ -150,7 +170,7 @@ public class TCPClient {
             else listof1s.remove(samePoint);
         }
         listOfPoints.addAll(listof1s);
-
+        System.out.println(listOfPoints);
         //now add all ppoints to map
 
         listOfPoints.forEach(p -> map.get(p.getKey()).set(p.getValue(), PointFlag.FLEET));
@@ -159,6 +179,8 @@ public class TCPClient {
     }
 
     private static void nowSet2s(List<Pair<Integer, Integer>> listOfPoints) {
+        System.out.println("set 2");
+
         List<List<Pair<Integer, Integer>>> listOf2 = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             listOf2.add(new ArrayList<>());
@@ -191,6 +213,7 @@ public class TCPClient {
     }
 
     private static List<List<Pair<Integer, Integer>>> set3s(List<Pair<Integer, Integer>> listOfPoints) {
+        System.out.println("set 3");
         List<List<Pair<Integer, Integer>>> listOf3 = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             listOf3.add(new ArrayList<>());
@@ -213,9 +236,12 @@ public class TCPClient {
             if (matchingShip == null) {
                 matchingShip = listOf3.stream().filter(ship -> ship.size() == 0).findFirst().orElse(null);
                 if (matchingShip == null) continue;
+                System.out.println("created new ship");
                 matchingShip.add(nextPoint);
             } else {
                 if (matchingShip.size() == 3) continue;
+                System.out.println("added to old ship");
+
                 matchingShip.add(nextPoint);
             }
         }
@@ -226,5 +252,42 @@ public class TCPClient {
     private static int findBlockDistance(Pair<Integer, Integer> nextPoint, Pair<Integer, Integer> pointInList) {
         return Math.abs(pointInList.getKey() - nextPoint.getKey()) +
                 Math.abs(pointInList.getValue() - nextPoint.getValue());
+    }
+    private static Pair<Integer, Integer> getMockPoint() {
+        List<Pair<Integer, Integer>> ml = new ArrayList<>();
+        ml.add(new Pair<>(0,0));
+        ml.add(new Pair<>(0,1));
+        ml.add(new Pair<>(0,2));
+        ml.add(new Pair<>(0,3));
+
+        ml.add(new Pair<>(3,3));
+        ml.add(new Pair<>(3,4));
+        ml.add(new Pair<>(3,2));
+
+        ml.add(new Pair<>(1,5));
+        ml.add(new Pair<>(1,6));
+        ml.add(new Pair<>(1,7));
+
+        ml.add(new Pair<>(5,5));
+        ml.add(new Pair<>(5,6));
+
+        ml.add(new Pair<>(5,8));
+        ml.add(new Pair<>(5,9));
+
+        ml.add(new Pair<>(2,5));
+        ml.add(new Pair<>(2,6));
+
+        ml.add(new Pair<>(2,8));
+        ml.add(new Pair<>(2,9));
+
+        ml.add(new Pair<>(8,7));
+        ml.add(new Pair<>(8,9));
+        ml.add(new Pair<>(9,6));
+        ml.add(new Pair<>(9,1));
+
+        if (testc  + 1 == ml.size() ) {
+            testc = 0;
+        }
+        return ml.get(testc ++);
     }
 }

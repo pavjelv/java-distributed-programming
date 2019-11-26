@@ -2,14 +2,14 @@ package gameModel;
 
 import javafx.util.Pair;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Action {
-    Flag type;
+public class Action implements Serializable {
+    private Flag type;
 
-    Id id;
-    Object payload;
-    List<List<PointFlag>> map;
+    private Id id;
+    private List<List<PointFlag>> map;
 
     public Id getId() {
         return id;
@@ -56,7 +56,6 @@ public class Action {
 
     public Action(Flag type, Object payload) {
         this.type = type;
-        this.payload = payload;
     }
 
     @Override
@@ -64,7 +63,6 @@ public class Action {
         return "Action{" +
                 "type=" + type +
                 ", id=" + id +
-                ", payload=" + payload +
                 ", map=" + map +
                 ", attemptCoordinates=" + attemptCoordinates +
                 '}';
@@ -78,11 +76,4 @@ public class Action {
         this.type = type;
     }
 
-    public Object getPayload() {
-        return payload;
-    }
-
-    public void setPayload(Object payload) {
-        this.payload = payload;
-    }
 }

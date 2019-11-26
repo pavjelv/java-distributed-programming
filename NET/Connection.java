@@ -31,6 +31,8 @@ class Connection extends Thread {
             System.out.println("blue output stream created");
 
 
+            outRed.writeObject("");
+            outBlue.writeObject("");
             outRed.writeObject(new Action(Id.RED));
             outBlue.writeObject(new Action(Id.BLUE));
 
@@ -75,7 +77,9 @@ class Connection extends Thread {
                 while(willRedMakeTurn){
                     outRed.writeObject(new Action(Flag.WAITING_FOR_YOUR_TURN));
                     Action actionRed = (Action) inRed.readObject();
+                    System.out.println(actionRed.toString());
                     if (actionRed.getType().equals(Flag.TRY)) {
+
                         Integer redAttemptX = actionRed.getAttemptCoordinates().getKey();
                         Integer redAttemptY = actionRed.getAttemptCoordinates().getValue();
                         switch (blueMap.get(redAttemptX).get(redAttemptY)) {
@@ -101,6 +105,7 @@ class Connection extends Thread {
                 while (willBlueMakeTurn) {
                     outBlue.writeObject(new Action(Flag.WAITING_FOR_YOUR_TURN));
                     Action actionBlue = (Action) inBlue.readObject();
+                    System.out.println(actionBlue.toString());
                     if (actionBlue.getType().equals(Flag.TRY)) {
                         Integer blueAttemptX = actionBlue.getAttemptCoordinates().getKey();
                         Integer blueAttemptY = actionBlue.getAttemptCoordinates().getValue();
