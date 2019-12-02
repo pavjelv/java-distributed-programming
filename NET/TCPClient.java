@@ -1,4 +1,7 @@
-import gameModel.*;
+package NET;
+
+import NET.client.UI.GameClient;
+import NET.gameModel.*;
 import javafx.util.Pair;
 
 import javax.naming.OperationNotSupportedException;
@@ -10,25 +13,26 @@ import java.io.*;
 import java.util.stream.Collectors;
 
 public class TCPClient {
-    private static final int SIZE = 10;
+    public static final int SIZE = 10;
     private static Scanner scanner = new Scanner(System.in);
     private static int testc = 0;
     public static void main(String args[]) throws ClassNotFoundException {
         Socket s = null;
+        GameClient client = new GameClient();
         try {
             int serverPort = 7896;
             s = new Socket(InetAddress.getLocalHost(), serverPort);
             ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
             System.out.println("OUT");
+            client.setDos(out);
             ObjectInputStream in = new ObjectInputStream(s.getInputStream());
-            Model m = new Model(10);
+            Model m = new Model(SIZE);
             System.out.println("IN");
             out.writeObject(m);
             System.out.println("wrote");
             String str = (String) in.readObject();
             System.out.println(str);
-            startGame(in, out);
-        } catch (UnknownHostException | OperationNotSupportedException e) {
+        } catch (UnknownHostException e ){//| OperationNotSupportedException e) {
             System.out.println("Socket:" + e.getMessage()); // host cannot be resolved
         } catch (EOFException e) {
             System.out.println("EOF:" + e.getMessage()); // end of stream reached
@@ -113,7 +117,7 @@ public class TCPClient {
 //        return new Pair<>(x,y);
     }
 
-    private static List<List<PointFlag>> setFlet() {
+    public static List<List<PointFlag>> setFlet() {
         List<List<PointFlag>> map = new ArrayList<List<PointFlag>>(SIZE);
 
         for (int i = 0; i < SIZE; i++) {

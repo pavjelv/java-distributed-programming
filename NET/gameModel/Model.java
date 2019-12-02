@@ -1,4 +1,4 @@
-package gameModel;
+package NET.gameModel;
 
 import javax.naming.InsufficientResourcesException;
 import java.io.Serializable;

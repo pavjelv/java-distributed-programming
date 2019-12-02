@@ -1,6 +1,6 @@
-import com.sun.org.apache.xpath.internal.operations.Mod;
-import gameModel.*;
-import javafx.util.Pair;
+package NET;
+
+import NET.gameModel.*;
 
 import java.io.*;
 import java.net.*;
@@ -30,10 +30,9 @@ class Connection extends Thread {
             outBlue = new ObjectOutputStream(clientSocketBlue.getOutputStream());
             System.out.println("blue output stream created");
 
-
             outRed.writeObject("");
             outBlue.writeObject("");
-            outRed.writeObject(new Action(Id.RED));
+            outRed.writeObject(new Model(10));
             outBlue.writeObject(new Action(Id.BLUE));
 
             // reading start game flag

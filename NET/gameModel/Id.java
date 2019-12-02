@@ -1,4 +1,4 @@
-package gameModel;
+package NET.gameModel;
 
 public enum Id {
     RED,
