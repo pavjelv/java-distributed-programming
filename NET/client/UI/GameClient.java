@@ -100,7 +100,7 @@ public class GameClient {
             public void mouseClicked(MouseEvent e) {
                 turnButton.setEnabled(false);
                 try {
-                    getDos().writeObject(new Model(gameMap, gameMap, Flag.TRY));
+                    getDos().writeObject(new Model(gameMap, gameMap, PointFlag.FLEET_HIT));
                     if(currentChangedCells.length() != 0) {
                         currentChangedCells.deleteCharAt(currentChangedCells.length() - 1);
                     }

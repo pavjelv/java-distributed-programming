@@ -7,33 +7,33 @@ import java.util.List;
 import java.util.Map;
 
 public class Model implements Serializable {
-    public List<List<Integer>> getOwnMap() {
+    public List<List<PointFlag>> getOwnMap() {
         return ownMap;
     }
 
-    public void setOwnMap(List<List<Integer>> ownMap) {
+    public void setOwnMap(List<List<PointFlag>> ownMap) {
         this.ownMap = ownMap;
     }
 
-    public List<List<Integer>> getOpponentMap() {
+    public List<List<PointFlag>> getOpponentMap() {
         return opponentMap;
     }
 
-    public void setOpponentMap(List<List<Integer>> opponentMap) {
+    public void setOpponentMap(List<List<PointFlag>> opponentMap) {
         this.opponentMap = opponentMap;
     }
 
-    public Integer getOperation() {
+    public PointFlag getOperation() {
         return operation;
     }
 
-    public void setOperation(Integer operation) {
+    public void setOperation(PointFlag operation) {
         this.operation = operation;
     }
 
-    List<List<Integer>> ownMap;
-    List<List<Integer>> opponentMap;
-    Integer operation;
+    List<List<PointFlag>> ownMap;
+    List<List<PointFlag>> opponentMap;
+    PointFlag operation;
 
     public Model(int size) {
         ownMap = new ArrayList<>();
@@ -53,10 +53,9 @@ public class Model implements Serializable {
                 '}';
     }
 
-    public Model(List<List<Integer>> ownMap, List<List<Integer>> opponentMap, Integer operation) {
+    public Model(List<List<PointFlag>> ownMap, List<List<PointFlag>> opponentMap, PointFlag operation) {
         this.ownMap = ownMap;
         this.opponentMap = opponentMap;
         this.operation = operation;
     }
 }
-;
