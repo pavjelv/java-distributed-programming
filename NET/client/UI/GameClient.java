@@ -1,5 +1,6 @@
 package NET.client.UI;
 
+import NET.gameModel.Action;
 import NET.gameModel.Flag;
 import NET.gameModel.Model;
 import NET.gameModel.PointFlag;
@@ -100,15 +101,10 @@ public class GameClient {
             public void mouseClicked(MouseEvent e) {
                 turnButton.setEnabled(false);
                 try {
-                    getDos().writeObject(new Model(gameMap, gameMap, PointFlag.FLEET_HIT));
-                    if(currentChangedCells.length() != 0) {
-                        currentChangedCells.deleteCharAt(currentChangedCells.length() - 1);
-                    }
+                    getDos().writeObject(new Action(gameMap));
 //                    getDos().writeUTF(SharedTag.UPDATE_MAP_KEY + " "
 //                            + currentChangedCells.deleteCharAt(currentChangedCells.length() - 1).toString());
-                    currentChangedCells = new StringBuilder();
                 } catch (IOException exception) {
-                    currentChangedCells = new StringBuilder();
                     connectionStatusLabel.setText("Connection error occurred!");
                 }
             }

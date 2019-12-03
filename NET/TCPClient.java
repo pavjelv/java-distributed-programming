@@ -4,7 +4,6 @@ import NET.client.UI.GameClient;
 import NET.gameModel.*;
 import javafx.util.Pair;
 
-import javax.naming.OperationNotSupportedException;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +21,41 @@ public class TCPClient {
         try {
             int serverPort = 7896;
             s = new Socket(InetAddress.getLocalHost(), serverPort);
+            System.out.println("Starting initialization");
             ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
             System.out.println("OUT");
             client.setDos(out);
             ObjectInputStream in = new ObjectInputStream(s.getInputStream());
-            Model m = new Model(SIZE);
             System.out.println("IN");
-            out.writeObject(m);
-            System.out.println("wrote");
-            String str = (String) in.readObject();
-            System.out.println(str);
-        } catch (UnknownHostException e ){//| OperationNotSupportedException e) {
+            System.out.println("CAME FROM RUN");
+            Action a = (Action) in.readObject();
+            System.out.println("Object read from run");
+            System.out.println(a.toString());
+            out.writeObject(Flag.START);
+            while (true) {
+                System.out.println("waiting for action");
+                Action nextAction = (Action) in.readObject();
+                System.out.println(nextAction.toString());
+                switch (nextAction.getType()) {
+                    case WAITING_FOR_YOUR_TURN:
+                        break;
+                        case WIN:
+                            System.err.println("you won");
+                            return;
+                        case LOST:
+                            System.err.println("you lost");
+                            return;
+                        case INVALID_TURN:
+                            System.err.println("you made wrong turn");
+                            break;
+                        case ATTEMPT_SUCCESSFUL:
+                        case ATTEMPT_UNSUCCESSFUL:
+                        default:
+                            System.err.println("something wrong" + nextAction.toString());
+                }
+            }
+
+        } catch (UnknownHostException e ) {
             System.out.println("Socket:" + e.getMessage()); // host cannot be resolved
         } catch (EOFException e) {
             System.out.println("EOF:" + e.getMessage()); // end of stream reached
@@ -45,54 +68,6 @@ public class TCPClient {
                 } catch (IOException e) {
                     System.out.println("close:" + e.getMessage());
                 }
-        }
-    }
-
-    private static void startGame(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException, OperationNotSupportedException {
-        Action a = (Action) in.readObject();
-        Id id = null;
-
-        List<List<PointFlag>> myMap = null;
-        List<List<PointFlag>> opponentMap = new ArrayList<List<PointFlag>>(SIZE);
-
-        for (int i = 0; i < SIZE; i++) {
-            List<PointFlag> list = new ArrayList<>();
-            for (int j = 0; j < SIZE; j++) {
-                list.add(PointFlag.EMPTY);
-            }
-            opponentMap.add(list);
-        }
-
-        if (!a.getType().equals(Flag.START)) {
-            throw new OperationNotSupportedException("game has not started");
-        }
-
-        id = a.getId();
-
-        myMap = setFlet();
-        out.writeObject(new Action(myMap));
-        while (true) {
-            Action nextAction = (Action) in.readObject();
-            System.out.println(nextAction.toString());
-            switch (nextAction.getType()) {
-                case WAITING_FOR_YOUR_TURN:
-//                    makeNextTurn();
-                    out.writeObject(new Action(getTurnCoordinates()));
-                    break;
-                case WIN:
-                    System.err.println("you won");
-                    return;
-                case LOST:
-                    System.err.println("you lost");
-                    return;
-                case INVALID_TURN:
-                    System.err.println("you made wrong turn");
-                    break;
-                case ATTEMPT_SUCCESSFUL: markPoint(true, nextAction.getAttemptCoordinates(), opponentMap); break;
-                case ATTEMPT_UNSUCCESSFUL: markPoint(false, nextAction.getAttemptCoordinates(), opponentMap); break;
-                default:
-                    System.err.println("something wrong" + nextAction.toString());
-            }
         }
     }
 

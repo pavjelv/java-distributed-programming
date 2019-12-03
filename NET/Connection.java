@@ -30,18 +30,19 @@ class Connection extends Thread {
             outBlue = new ObjectOutputStream(clientSocketBlue.getOutputStream());
             System.out.println("blue output stream created");
 
-            outRed.writeObject("");
-            outBlue.writeObject("");
-            outRed.writeObject(new Model(10));
+            outRed.writeObject(new Action(Id.RED));
             outBlue.writeObject(new Action(Id.BLUE));
 
             // reading start game flag
+            System.out.println("reading start game flags");
             inRed.readObject();
             inBlue.readObject();
 
             this.start();
+
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Connection:" + e.getMessage());
+            System.out.println("Connection:" + e.getCause());
+            e.printStackTrace();
         }
     }
 
@@ -51,10 +52,11 @@ class Connection extends Thread {
         Integer redCount = 20;
         Integer blueCount = 20;
         try {
+            System.out.println("game started");
             //reading maps
             Action b = (Action) inBlue.readObject();
             Action r = (Action) inRed.readObject();
-
+            System.out.println("Fleet is set up");
             if (b.getType().equals(r.getType()) && b.getType().equals(Flag.SET_FLEET)) {
                 blueMap = b.getMap();
                 redMap = r.getMap();
