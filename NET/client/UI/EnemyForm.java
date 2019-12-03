@@ -4,6 +4,7 @@ import NET.gameModel.Action;
 import NET.gameModel.Flag;
 import NET.gameModel.Model;
 import NET.gameModel.PointFlag;
+import javafx.util.Pair;
 import shared.SharedTag;
 
 import javax.swing.*;
@@ -24,7 +25,7 @@ public class EnemyForm extends AbstractForm{
     private JButton turnButton;
     private JLabel connectionStatusLabel;
     private ObjectOutputStream dos;
-    private List<List<PointFlag>> gameMap;
+    private Pair<Integer, Integer> currentAttemptCoordinate;
 
 
     public EnemyForm(ObjectOutputStream dos) {
@@ -51,12 +52,14 @@ public class EnemyForm extends AbstractForm{
             @Override
             public void mouseClicked(MouseEvent e) {
                 connectionStatusLabel.setText("Mouse event: " + getSquareMapCoordinate(e.getX()) + " " + getSquareMapCoordinate(e.getY()));
-
-                Graphics graphics = gameField.getGraphics();
-                redrawGrid(graphics);
-                int x = getSquareMapCoordinate(e.getX());
-                int y = getSquareMapCoordinate(e.getY());
-                updateGameField(graphics, x, y, true);
+                if(currentAttemptCoordinate == null) {
+                    Graphics graphics = gameField.getGraphics();
+                    redrawGrid(graphics);
+                    int x = getSquareMapCoordinate(e.getX());
+                    int y = getSquareMapCoordinate(e.getY());
+                    updateGameField(graphics, x, y, true);
+                    currentAttemptCoordinate = new Pair<>(x, y);
+                }
             }
 
         });
@@ -65,6 +68,21 @@ public class EnemyForm extends AbstractForm{
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 System.out.println("Ok from server");
+                if(currentAttemptCoordinate != null) {
+                    updateMap(currentAttemptCoordinate.getKey(), currentAttemptCoordinate.getValue(), PointFlag.FLEET_HIT);
+                }
+                turnButton.setVisible(true);
+                currentAttemptCoordinate = null;
+                connectionStatusLabel.setText("Attempt successful");
+                updateGameField(gameField.getGraphics());
+            }
+        });
+
+        gameField.addPropertyChangeListener(SharedTag.UNSUCCESSFUL, new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                currentAttemptCoordinate = null;
+                connectionStatusLabel.setText("Attempt unsuccessful");
                 updateGameField(gameField.getGraphics());
             }
         });
@@ -84,26 +102,29 @@ public class EnemyForm extends AbstractForm{
         turnButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                turnButton.setEnabled(false);
-                try {
-                    getDos().writeObject(new Action(gameMap));
-
-                } catch (IOException exception) {
-                    connectionStatusLabel.setText("Connection error occurred!");
+                if (currentAttemptCoordinate != null) {
+                    try {
+                        turnButton.setVisible(false);
+                        updateMap(currentAttemptCoordinate.getKey(), currentAttemptCoordinate.getValue(), PointFlag.EMPTY_ATTEMPTED);
+                        getDos().writeObject(new Action(currentAttemptCoordinate));
+                    } catch (IOException exception) {
+                        currentAttemptCoordinate = null;
+                        connectionStatusLabel.setText("Connection error occurred!");
+                    }
                 }
             }
         });
-
     }
 
 
-    public void fireUpdateEvent() {
-        gameField.firePropertyChange(SharedTag.STATUS_OK, false, true);
+    public void fireUnsuccessfulAttempt() {
+        gameField.firePropertyChange(SharedTag.UNSUCCESSFUL, false, true);
     }
 
     public void notifyAboutTurn() {
         connectionStatusLabel.setText("Your turn");
         turnButton.setEnabled(true);
+        turnButton.setVisible(true);
     }
 
 
@@ -114,14 +135,8 @@ public class EnemyForm extends AbstractForm{
         PointFlag currentCellValue = getMapCellValue(xCoordinate, yCoordinate);
         if(currentCellValue == PointFlag.FLEET_HIT) {
             graphics.setColor(Color.RED);
-            graphics.fillRect(xCoordinate * squarePixelSize + 1, yCoordinate * squarePixelSize + 1, squarePixelSize - 1 , squarePixelSize - 1);
+            graphics.fillOval(xCoordinate * squarePixelSize + 1, yCoordinate * squarePixelSize + 1, squarePixelSize - 1 , squarePixelSize - 1);
             return false;
-//        } else if (currentCellValue == -uniqueClientId) {
-//            graphics.setColor(Color.RED);
-//            graphics.fillOval(xCoordinate * squarePixelSize + 1, yCoordinate * squarePixelSize + 1, squarePixelSize - 1 , squarePixelSize - 1);
-//        } else if (currentCellValue < 0 && currentCellValue != -uniqueClientId){
-//            graphics.setColor(Color.BLUE);
-//            graphics.fillOval(xCoordinate * squarePixelSize + 1, yCoordinate * squarePixelSize + 1, squarePixelSize - 1 , squarePixelSize - 1);
         } else if (currentCellValue == PointFlag.EMPTY) {
             if(fromClick) {
                 graphics.setColor(Color.BLUE);
@@ -129,28 +144,11 @@ public class EnemyForm extends AbstractForm{
                 graphics.fillRect(xCoordinate * squarePixelSize + 1, yCoordinate * squarePixelSize + 1, squarePixelSize - 1 , squarePixelSize - 1);
             } else return false;
             return false;
-//        } else if (fromClick) {
-//            gameMap[xCoordinate][yCoordinate] = -uniqueClientId;
-//            graphics.setColor(Color.RED);
-//            graphics.fillOval(xCoordinate * squarePixelSize + 1, yCoordinate * squarePixelSize + 1, squarePixelSize - 1 , squarePixelSize - 1);
         } else {
             graphics.setColor(Color.BLUE);
             graphics.fillRect(xCoordinate * squarePixelSize + 1, yCoordinate * squarePixelSize + 1, squarePixelSize - 1 , squarePixelSize - 1);
         }
         return true;
-    }
-
-    public void updateMap(int x, int y, PointFlag value) {
-        gameMap.get(x).set(y, value);
-    }
-
-    public void updateMap(List<List<PointFlag>> newMap) {
-        gameMap = newMap;
-    }
-
-
-    private int getSquareMapCoordinate(int x) {
-        return x/squarePixelSize;
     }
 
     public JPanel getGameField() {

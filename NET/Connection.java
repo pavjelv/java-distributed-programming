@@ -75,8 +75,8 @@ class Connection extends Thread {
                 if (checkIfSomeoneWon(redCount, blueCount)) return;
                 outRed.writeObject(new Action(Flag.WAITING_FOR_YOUR_TURN));
                 boolean willRedMakeTurn = true;
+                outRed.writeObject(new Action(redMap));
                 while(willRedMakeTurn){
-                    outRed.writeObject(new Action(Flag.WAITING_FOR_YOUR_TURN));
                     Action actionRed = (Action) inRed.readObject();
                     System.out.println(actionRed.toString());
                     if (actionRed.getType().equals(Flag.TRY)) {
@@ -87,10 +87,14 @@ class Connection extends Thread {
                             case EMPTY:
                                 blueMap.get(redAttemptX).set(redAttemptY, PointFlag.EMPTY_ATTEMPTED);
                                 willRedMakeTurn = false;
+                                System.out.println("hit empty from red");
+                                outRed.writeObject(new Action(Flag.ATTEMPT_UNSUCCESSFUL));
                                 break;
                             case FLEET:
                                 blueMap.get(redAttemptX).set(redAttemptY, PointFlag.FLEET_HIT);
                                 willRedMakeTurn = --blueCount > 0;
+                                outRed.writeObject(new Action(Flag.ATTEMPT_SUCCESSFUL));
+                                System.out.println("hit fleet from red");
                                 break;
                             default:
                                 outRed.writeObject(new Action(Flag.INVALID_TURN, actionRed.getAttemptCoordinates()));
@@ -103,8 +107,8 @@ class Connection extends Thread {
                 if (checkIfSomeoneWon(redCount, blueCount)) return;
                 outBlue.writeObject(new Action(Flag.WAITING_FOR_YOUR_TURN));
                 boolean willBlueMakeTurn = true;
+                outBlue.writeObject(new Action(blueMap));
                 while (willBlueMakeTurn) {
-                    outBlue.writeObject(new Action(Flag.WAITING_FOR_YOUR_TURN));
                     Action actionBlue = (Action) inBlue.readObject();
                     System.out.println(actionBlue.toString());
                     if (actionBlue.getType().equals(Flag.TRY)) {
@@ -113,12 +117,15 @@ class Connection extends Thread {
                         switch (redMap.get(blueAttemptX).get(blueAttemptY)) {
                             case EMPTY:
                                 redMap.get(blueAttemptX).set(blueAttemptY, PointFlag.EMPTY_ATTEMPTED);
-
+                                System.out.println("hit empty from blue");
                                 willBlueMakeTurn = false;
+                                outBlue.writeObject(new Action(Flag.ATTEMPT_UNSUCCESSFUL));
                                 break;
                             case FLEET:
                                 redMap.get(blueAttemptX).set(blueAttemptY, PointFlag.FLEET_HIT);
+                                System.out.println("hit fleet from blue");
                                 willBlueMakeTurn = --redCount > 0;
+                                outBlue.writeObject(new Action(Flag.ATTEMPT_SUCCESSFUL));
                                 break;
                             default:
                                 outBlue.writeObject(new Action(Flag.INVALID_TURN, actionBlue.getAttemptCoordinates()));
@@ -127,8 +134,12 @@ class Connection extends Thread {
                         }
                     }
                 }
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
+                try {
+                    clientSocketBlue.close();
+                    clientSocketRed.close();
+                } catch (IOException e1){}
             }
         }
     }

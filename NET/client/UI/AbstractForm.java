@@ -42,6 +42,24 @@ public abstract class AbstractForm {
         }
     }
 
+    public void updateMap(int x, int y, PointFlag value) {
+        gameMap.get(x).set(y, value);
+    }
+
+    public void updateMap(List<List<PointFlag>> newMap) {
+        gameMap = newMap;
+    }
+
+    protected int getSquareMapCoordinate(int x) {
+        return x/squarePixelSize;
+    }
+
+    public void fireUpdateEvent() {
+        getGameField().firePropertyChange(shared.SharedTag.STATUS_OK, false, true);
+    }
+
+
+
     protected PointFlag getMapCellValue(int x, int y) {
         return gameMap.get(x).get(y);
     }

@@ -39,6 +39,12 @@ public class TCPClient {
                 Action nextAction = (Action) in.readObject();
                 System.out.println(nextAction.toString());
                 switch (nextAction.getType()) {
+                    case SET_FLEET:
+                        System.out.println("Updating map");
+                        client.updateMap(nextAction.getMap());
+                        client.fireUpdateEvent();
+                        client.notifyAboutTurn();
+                        break;
                     case WAITING_FOR_YOUR_TURN:
                         client.notifyAboutTurn();
                         break;
@@ -52,7 +58,11 @@ public class TCPClient {
                             System.err.println("you made wrong turn");
                             break;
                         case ATTEMPT_SUCCESSFUL:
+                            client.fireUpdateEnemyField();
+                            break;
                         case ATTEMPT_UNSUCCESSFUL:
+                            client.notifyAboutUnsuccessfulAttempt();
+                            break;
                         default:
                             System.err.println("something wrong" + nextAction.toString());
                 }
