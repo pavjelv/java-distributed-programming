@@ -1,6 +1,6 @@
 package NET;
 
-import NET.client.UI.GameClient;
+import NET.client.UI.MyOwnForm;
 import NET.gameModel.*;
 import javafx.util.Pair;
 
@@ -17,20 +17,22 @@ public class TCPClient {
     private static int testc = 0;
     public static void main(String args[]) throws ClassNotFoundException {
         Socket s = null;
-        GameClient client = new GameClient();
         try {
             int serverPort = 7896;
             s = new Socket(InetAddress.getLocalHost(), serverPort);
             System.out.println("Starting initialization");
             ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
             System.out.println("OUT");
-            client.setDos(out);
+            MyOwnForm client = new MyOwnForm(out);
             ObjectInputStream in = new ObjectInputStream(s.getInputStream());
             System.out.println("IN");
             System.out.println("CAME FROM RUN");
             Action a = (Action) in.readObject();
             System.out.println("Object read from run");
             System.out.println(a.toString());
+            if(a.getType().equals(Flag.START)) {
+                client.notifyAboutTurn();
+            }
             out.writeObject(Flag.START);
             while (true) {
                 System.out.println("waiting for action");
@@ -38,6 +40,7 @@ public class TCPClient {
                 System.out.println(nextAction.toString());
                 switch (nextAction.getType()) {
                     case WAITING_FOR_YOUR_TURN:
+                        client.notifyAboutTurn();
                         break;
                         case WIN:
                             System.err.println("you won");
